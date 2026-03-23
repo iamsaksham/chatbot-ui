@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import styles from "./ChatUI.module.css";
 
-function messageBody(m) {
-  return m.text ?? m.content ?? "";
-}
+import { getChatCompletion } from "@/lib/openai";
+import styles from "./ChatUI.module.css";
 
 function roleLabel(role) {
   if (role === "user") return "You";
@@ -17,9 +15,9 @@ export default function ChatUI() {
   const [userText, setUserText] = useState("");
   const [messagesList, setMessagesList] = useState([
     {
-      id: "welcome",
+      id: crypto.randomUUID(),
       role: "assistant",
-      text: "Hi — ask anything and I will reply using OpenAI.",
+      content: "Hi — ask anything and I will reply using OpenAI.",
     },
   ]);
   const listRef = useRef(null);
@@ -31,16 +29,22 @@ export default function ChatUI() {
     }
   }, [messagesList]);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const trimmed = userText.trim();
     if (!trimmed) return;
 
     setMessagesList((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), role: "user", text: trimmed },
+      { id: crypto.randomUUID(), role: "user", content: trimmed },
     ]);
     setUserText("");
+
+    const response = await getChatCompletion(messagesList);
+    setMessagesList((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), role: "assistant", content: response },
+    ]);
   }
 
   function handleKeyDown(e) {
@@ -69,7 +73,7 @@ export default function ChatUI() {
                 <div
                   className={isUser ? styles.bubbleUser : styles.bubbleAssistant}
                 >
-                  <p className={styles.content}>{messageBody(message)}</p>
+                  <p className={styles.content}>{message.content}</p>
                 </div>
               </div>
             </div>
