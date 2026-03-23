@@ -1,17 +1,38 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f172a;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #f8fafc;
   }
 }
 
+/* Single continuous backdrop (no layered radials / no second base color) */
 html {
   height: 100%;
+  min-height: 100dvh;
+  background: linear-gradient(
+    155deg,
+    #fff200 0%,
+    #ff3cc7 46%,
+    #00ff94 100%
+  );
+  background-attachment: fixed;
+  background-color: #fff200;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    background: linear-gradient(
+      155deg,
+      #ca8a04 0%,
+      #db2777 48%,
+      #16a34a 100%
+    );
+    background-attachment: fixed;
+    background-color: #ca8a04;
+  }
 }
 
 html,
@@ -25,8 +46,8 @@ body {
   display: flex;
   flex-direction: column;
   color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background: transparent;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

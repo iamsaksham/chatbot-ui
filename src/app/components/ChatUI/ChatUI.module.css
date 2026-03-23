@@ -1,0 +1,203 @@
+.chatContainer {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.messagesList {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0 0 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  scrollbar-gutter: stable;
+}
+
+.messageRowUser,
+.messageRowAssistant {
+  display: flex;
+  width: 100%;
+}
+
+.messageRowUser {
+  justify-content: flex-end;
+}
+
+.messageRowAssistant {
+  justify-content: flex-start;
+}
+
+.messageStackUser,
+.messageStackAssistant {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: min(85%, 28rem);
+}
+
+.messageStackUser {
+  align-items: flex-end;
+}
+
+.messageStackAssistant {
+  align-items: flex-start;
+}
+
+.role {
+  font-size: 0.6875rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary, #666);
+  padding: 0 0.2rem;
+}
+
+.bubbleUser,
+.bubbleAssistant {
+  border-radius: 1.15rem;
+  padding: 0.65rem 0.95rem;
+  line-height: 1.45;
+}
+
+.bubbleUser {
+  color: var(--text-primary, #171717);
+  background: color-mix(
+    in srgb,
+    var(--text-primary, #171717) 11%,
+    var(--foreground, #fff)
+  );
+  border: 1px solid var(--button-secondary-border, #ebebeb);
+  border-bottom-right-radius: 0.35rem;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--text-primary, #171717) 6%, transparent);
+}
+
+.bubbleAssistant {
+  color: var(--text-primary, #171717);
+  background: color-mix(in srgb, var(--text-primary, #171717) 5.5%, transparent);
+  border: 1px solid var(--button-secondary-border, #ebebeb);
+  border-bottom-left-radius: 0.35rem;
+}
+
+.content {
+  margin: 0;
+  font-size: 0.9375rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.composerDock {
+  flex-shrink: 0;
+  padding-top: 0.5rem;
+  margin-top: auto;
+  border-top: 1px solid var(--button-secondary-border, #ebebeb);
+  background: var(--foreground, #fff);
+}
+
+.composer {
+  display: flex;
+  align-items: stretch;
+  gap: 0.65rem;
+  width: 100%;
+  max-width: none;
+  padding: 0.35rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-primary, #171717) 4%, transparent);
+  border: 1px solid var(--button-secondary-border, #ebebeb);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--text-primary, #171717) 6%, transparent);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: 0.65rem 1.15rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-primary, #171717);
+  font: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--text-secondary, #666);
+  opacity: 0.85;
+}
+
+.input:focus-visible {
+  box-shadow: 0 0 0 2px var(--background, #fafafa),
+    0 0 0 4px color-mix(in srgb, var(--text-primary, #171717) 25%, transparent);
+}
+
+.send {
+  flex-shrink: 0;
+  align-self: center;
+  min-height: 2.5rem;
+  padding: 0 1.35rem;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  color: var(--background, #fafafa);
+  background: var(--text-primary, #171717);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--text-primary, #171717) 35%, transparent);
+}
+
+.send:hover:not(:disabled) {
+  filter: brightness(1.06);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--text-primary, #171717) 22%, transparent);
+}
+
+.send:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.send:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.send:focus-visible {
+  outline: 2px solid var(--text-primary, #171717);
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .messageStackUser,
+  .messageStackAssistant {
+    max-width: 92%;
+  }
+
+  .composer {
+    flex-direction: column;
+    border-radius: 1.25rem;
+    padding: 0.5rem;
+  }
+
+  .input,
+  .send {
+    border-radius: 0.85rem;
+    width: 100%;
+  }
+
+  .send {
+    min-height: 2.75rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .bubbleAssistant {
+    background: color-mix(in srgb, var(--text-primary, #ededed) 8%, transparent);
+  }
+}
