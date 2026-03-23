@@ -34,16 +34,20 @@ export default function ChatUI() {
     const trimmed = userText.trim();
     if (!trimmed) return;
 
-    setMessagesList((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), role: "user", content: trimmed },
-    ]);
+    const userMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: trimmed,
+    };
+    const updatedMessagesList = [...messagesList, userMessage];
+    setMessagesList(updatedMessagesList);
     setUserText("");
 
-    const response = await getChatCompletion(messagesList);
+    const apiMessages = updatedMessagesList.map(({ role, content }) => ({ role, content }));
+    const responseData = await getChatCompletion(apiMessages);
     setMessagesList((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), role: "assistant", content: response },
+      { id: crypto.randomUUID(), role: "assistant", content: responseData },
     ]);
   }
 
