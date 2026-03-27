@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-import { getChatCompletion } from "@/lib/openai";
+// import { getChatCompletion } from "@/lib/openai";
 import styles from "./ChatUI.module.css";
 
 function roleLabel(role) {
@@ -44,10 +43,35 @@ export default function ChatUI() {
     setUserText("");
 
     const apiMessages = updatedMessagesList.map(({ role, content }) => ({ role, content }));
-    const responseData = await getChatCompletion(apiMessages);
+
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: apiMessages }),
+    });
+
+    const payload = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      const msg =
+        typeof payload.error === "string"
+          ? payload.error
+          : `Chat request failed (${res.status}).`;
+      throw new Error(msg);
+    }
+
+    const assistantText = payload?.response?.output_text;
+    if (typeof assistantText !== "string") {
+      throw new Error("Unexpected response from chat API.");
+    }
+
     setMessagesList((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), role: "assistant", content: responseData },
+      {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: assistantText.trim(),
+      },
     ]);
   }
 
