@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-// import { getChatCompletion } from "@/lib/openai";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import styles from "./ChatUI.module.css";
 
 function roleLabel(role) {
@@ -10,69 +11,53 @@ function roleLabel(role) {
   return role;
 }
 
+/** Flatten AI SDK UIMessage text parts for display (including while streaming). */
+function textFromParts(message) {
+  if (!message?.parts?.length) return "";
+  return message.parts
+    .filter((p) => p.type === "text")
+    .map((p) => p.text)
+    .join("");
+}
+
 export default function ChatUI() {
   const [userText, setUserText] = useState("");
-  const [messagesList, setMessagesList] = useState([
-    {
-      id: crypto.randomUUID(),
-      role: "assistant",
-      content: "Hi — ask anything and I will reply using OpenAI.",
-    },
-  ]);
   const listRef = useRef(null);
+
+  const transport = useMemo(() => new DefaultChatTransport({api: "/api/chatstream"}), []);
+
+  const { messages, sendMessage, status, error, clearError } = useChat({
+    transport,
+    messages: [
+      {
+        id: "welcome",
+        role: "assistant",
+        parts: [
+          {
+            type: "text",
+            text: "Hi — ask anything and I will stream replies from the model (LangChain → AI SDK).",
+          },
+        ],
+      },
+    ],
+  });
 
   useEffect(() => {
     const el = listRef.current;
     if (el) {
       el.scrollTop = el.scrollHeight;
     }
-  }, [messagesList]);
+  }, [messages]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     const trimmed = userText.trim();
     if (!trimmed) return;
+    if (status === "submitted" || status === "streaming") return;
 
-    const userMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: trimmed,
-    };
-    const updatedMessagesList = [...messagesList, userMessage];
-    setMessagesList(updatedMessagesList);
+    clearError();
     setUserText("");
-
-    const apiMessages = updatedMessagesList.map(({ role, content }) => ({ role, content }));
-
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: apiMessages }),
-    });
-
-    const payload = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      const msg =
-        typeof payload.error === "string"
-          ? payload.error
-          : `Chat request failed (${res.status}).`;
-      throw new Error(msg);
-    }
-
-    const assistantText = payload?.response?.output_text;
-    if (typeof assistantText !== "string") {
-      throw new Error("Unexpected response from chat API.");
-    }
-
-    setMessagesList((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: assistantText.trim(),
-      },
-    ]);
+    await sendMessage({ text: trimmed });
   }
 
   function handleKeyDown(e) {
@@ -82,11 +67,14 @@ export default function ChatUI() {
     }
   }
 
+  const busy = status === "submitted" || status === "streaming";
+
   return (
     <div className={styles.chatContainer}>
       <div ref={listRef} className={styles.messagesList} aria-live="polite">
-        {messagesList.map((message) => {
+        {messages.map((message) => {
           const isUser = message.role === "user";
+          const content = textFromParts(message);
           return (
             <div
               key={message.id}
@@ -101,12 +89,17 @@ export default function ChatUI() {
                 <div
                   className={isUser ? styles.bubbleUser : styles.bubbleAssistant}
                 >
-                  <p className={styles.content}>{message.content}</p>
+                  <p className={styles.content}>{content}</p>
                 </div>
               </div>
             </div>
           );
         })}
+        {error ? (
+          <p className={styles.content} role="alert">
+            {error.message}
+          </p>
+        ) : null}
       </div>
       <div className={styles.composerDock}>
         <form className={styles.composer} onSubmit={handleSubmit} noValidate>
@@ -123,7 +116,7 @@ export default function ChatUI() {
           <button
             className={styles.send}
             type="submit"
-            disabled={!userText.trim()}
+            disabled={!userText.trim() || busy}
           >
             Send
           </button>
