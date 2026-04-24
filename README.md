@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# chatbot-ui
 
-## Getting Started
+A [Next.js](https://nextjs.org/) app that provides a streaming chat UI. The main experience uses custom API route that streams tokens from OpenAI via a stream.
 
-First, run the development server:
+## Features
+
+- **Streaming chat** — Messages are streamed from `gpt-4o-mini` (LangChain → SDK message stream).
+- **Non-streaming API (optional)** — `/api/chat` demonstrates the OpenAI **Responses** API with a fixed “pirate” system style (uses `OPEN_AI_KEY` only).
+
+## Requirements
+
+- **Node.js** — Use a current LTS version compatible with your Next.js release (for example **Node 20** or newer).
+- **npm** (or pnpm / yarn) for installing dependencies.
+- **OpenAI API key** — The streaming route needs a key with access to the configured model (`gpt-4o-mini`).
+
+## Environment variables
+
+Create a file named **`.env.local`** in the project root (Next.js loads it automatically). Restart the dev server after any change.
+
+| Variable | Used by | Description |
+|----------|---------|-------------|
+| `OPENAI_API_KEY` | `/api/chatstream` (preferred) | Standard OpenAI API key. |
+| `OPEN_AI_KEY` | `/api/chatstream`, `/api/chat` | Alternate name; streaming accepts `OPENAI_API_KEY` **or** `OPEN_AI_KEY`. Non-streaming `/api/chat` expects **`OPEN_AI_KEY`**. |
+
+Set at least one of `OPENAI_API_KEY` or `OPEN_AI_KEY` for the default UI, which calls `/api/chatstream`.
+
+> **Security:** Do not commit `.env.local` or real API keys. It should stay in `.gitignore`.
+
+## Getting started
+
+```bash
+npm install
+```
+
+Add `.env.local` with your key(s), then:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start the development server. |
+| `npm run build` | Production build. |
+| `npm run start` | Run the production server (after `build`). |
+| `npm run lint` | Run ESLint. |
 
-## Learn More
+## Configuration notes
 
-To learn more about Next.js, take a look at the following resources:
+- **Model** — Both API routes use `gpt-4o-mini`. Change the model strings in the route files if you need a different model.
+- **Streaming timeout** — `chatstream` sets `maxDuration = 30` (seconds) for the route; adjust on your hosting platform if responses can run longer.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
